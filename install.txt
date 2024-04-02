@@ -1,0 +1,12 @@
+Antes de todo: dentro del path de la app ejecutar: npm init -y
+Primer paso: instalar express: npm install express --save
+Segundo paso: crear escucha de express
+Tercer paso: instalar nodemon: npm install -g nodemon
+Cuarto paso: instalar mongoose: npm i mongoose
+Quinto paso: instalar para variables de entorno: npm i dotenv
+Sexto paso: instalar cors: npm i cors
+Septimo paso: instalar dependencia para crear json web token: npm install jsonwebtoken
+Octavo paso: instalar express-validator: npm i express-validator
+Noveno paso: instalar bcryptjs para generar claves encriptadas: npm install bcryptjs
+Décimo paso: instalar uuidv4 para generar nombres de imagenes subidas: npm install uuidv4
+Undécimo paso: instalar express-fileupload para subir imagenes: npm i express-fileupload
