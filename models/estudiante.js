@@ -31,10 +31,6 @@ const EstudianteSchema = Schema({
         ref: 'Usuario',
         required: true
     },
-    curso: {
-        type: Schema.Types.ObjectId,
-        ref: 'Curso'
-    },
     estado: {
         type: Boolean,
         default: true

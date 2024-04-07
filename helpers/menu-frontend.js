@@ -4,11 +4,7 @@ const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
             titulo: 'Dashboard',
             icono: 'mdi mdi-gauge',
             submenu: [
-              { titulo: 'Graficas', url: 'graficas'},
-              { titulo: 'Main', url: '/'},
-              { titulo: 'ProgressBar', url: 'progress'},
-              { titulo: 'Promesas', url: 'promesas'},
-              { titulo: 'Rxjs', url: 'rxjs'}
+              { titulo: 'Main', url: '/'}
             ]
           },
           {
@@ -23,6 +19,7 @@ const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
 
     if( role === 'ADMIN_ROLE'){
         menu[1].submenu.unshift({ titulo: 'Usuarios', url: 'usuarios'});
+        menu[1].submenu.unshift({ titulo: 'Titulación', url: 'titulacion'});
     }
 
     return menu;

@@ -20,9 +20,10 @@ app.use('/api/busqueda', require('./routes/busquedas'));
 app.use('/api/cursos', require('./routes/cursos'));
 app.use('/api/estudiantes',require('./routes/estudiantes'));
 app.use('/api/login',require('./routes/auth'));
-app.use('/api/ofertas', require('./routes/ofertas'));
 app.use('/api/uploads', require('./routes/uploads'));
 app.use('/api/usuarios',require('./routes/usuarios'));
+app.use('/api/titulacion',require('./routes/titulacion'));
+
 
 
 dbConection();

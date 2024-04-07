@@ -1,32 +1,84 @@
-const bcrypt = require('bcryptjs');
 const { response, request } = require('express');
-const mongoose = require('mongoose');
-
 const Curso = require('../models/curso');
+
 const { validarMongoID } = require('../middlewares/validar-mongoid');
 
-const getCursos = async (req, res = response) => {
+const getCursos = async (req = request, res = response) => {
 
     const from = Number(req.query.from)||0;
     const limit = Number(req.query.limit)||0;
  
     const [cursos, total] = await Promise.all([
         Curso
-                .find({},'grado nivel paralelo jornada especialidad usuario')
-                .populate('grado', 'nombre')
-                .populate('especialidad','nombreCorto')
-                .sort({grado:1, paralelo: 1, especialidad: 1})
+                .find({},'')
                 .skip(from)
                 .limit(limit),
         Curso.countDocuments()
     ]);
-
     res.json({
         ok: true,
         cursos,
         total
     });
+}
 
+const getCursosJornada = async (req = request, res = response) => {
+
+    const from = Number(req.query.from)||0;
+    const limit = Number(req.query.limit)||0;
+    const jor = Number(req.query.jor)||0;
+    const niv = Number(req.query.niv)||0;
+    const esp = Number(req.query.esp)||0;
+
+
+    
+    switch (jor) {
+        case 1:
+            jornada = 'MATUTINA';            
+            break;
+        case 2:
+            jornada = 'VESPERTINA';            
+            break;
+        case 3:
+            jornada = 'NOCTURNA';            
+            break;
+        default:
+            break;
+    }
+   
+    switch (niv) {
+        case 1:
+            nivel = 'EGB SUPERIOR';            
+            break;
+        case 2:
+            nivel = 'BACHILLERATO GENERAL UNIFICADO';            
+            break;
+        case 3:
+            nivel = 'BACHILLERATO TECNICO';            
+            break;
+        default:
+            break;
+    }
+
+
+    const cursos = [];
+    const total = 0;
+
+    if(jor>0){
+        const [cursos, total] = await Promise.all([
+            Curso
+                    .find({$and: [{jornada, nivel}]},'')
+                    .skip(from)
+                    .limit(limit),
+            Curso   .find({jornada}).count()
+        ]);
+        res.json({
+            ok: true,
+            cursos,
+            total
+        });
+    }
+ 
 }
 
 const getCursoId = async(req, res  = response) => {
@@ -41,9 +93,7 @@ const getCursoId = async(req, res  = response) => {
     }
 
     try {
-        const curso = await Curso.findById(cid)
-                                 .populate('grado', 'nombre')
-                                 .populate('especialidad','nombreCorto');
+        const curso = await Curso.findById(cid); 
         if(curso){
             res.json({
                 ok: true,
@@ -65,33 +115,43 @@ const getCursoId = async(req, res  = response) => {
 }
 
 
-const guardarCurso = async(req, res = response) => {
+const guardarCurso = async(req = request, res = response) => {
     
     const uid = req.uid;
-    const { grado, paralelo, jornada, especialidad } = req.body;
+    const { grado,
+            grado_abrev,
+            orden,
+            nivel,
+            nivel_abrev,
+            paralelo,
+            jornada,
+            especialidad
+    } = req.body;
 
-    if(!validarMongoID(grado)){
-        return res.status(500).json({
-            ok: false,
-            msg: 'El Id enviado no es válido'
-        });
-    }
-   
+    const datosNuevoCurso = new Curso({
+       usuario: uid,
+        ...req.body
+    });
+    
     try {
-
         const verificaExiste = await Curso.findOne({
-            $and: [{grado},{paralelo},{jornada},{especialidad}]
+            $and: [{grado},
+                   {grado_abrev},
+                   {nivel},
+                   {nivel_abrev},
+                   {paralelo},
+                   {jornada},
+                   {especialidad}]
         });
 
         if(verificaExiste){
             return res.status(404).json({
                 ok: false,
-                msg: 'Ya existe un curso con la información ingresada'
+                msg: 'Ya existe un curso con la información ingresada, no es posible guardar'
             });
         }
 
-        const nuevoCurso = req.body;
-        const curso = new Curso( nuevoCurso );
+        const curso = new Curso( datosNuevoCurso );
         await curso.save();
 
         res.json({
@@ -108,12 +168,12 @@ const guardarCurso = async(req, res = response) => {
     }
 }
 
-const actualizarCurso = async (req, res = response) => {
+const actualizarCurso = async (req = request, res = response) => {
 
     const cid = req.params.id;
     const usuario = req.uid;
 
-    const datosNuevoCurso = new Curso({
+    const datosCursoActualizar = new Curso({
         usuario,
         _id: cid,
         ...req.body
@@ -137,20 +197,34 @@ const actualizarCurso = async (req, res = response) => {
             });
         }
 
-        const { grado, paralelo, jornada, especialidad } = req.body;
+        const { grado,
+                grado_abrev,
+                orden,
+                nivel,
+                nivel_abrev,
+                paralelo,
+                jornada,
+                especialidad
+        } = req.body;
 
         const verificaExiste = await Curso.findOne({
-            $and: [{grado},{paralelo},{jornada},{especialidad}]
+            $and: [{grado},
+                   {grado_abrev},
+                   {nivel},
+                   {nivel_abrev},
+                   {paralelo},
+                   {jornada},
+                   {especialidad}]
         });
 
         if(verificaExiste){
             return res.status(404).json({
                 ok: false,
-                msg: 'Ya existe un curso con la información ingresada'
+                msg: 'Ya existe un curso con la información ingresada, no es posible actualizar'
             });
         }
 
-        const cursoActualizado = await Curso.findByIdAndUpdate(cid, datosNuevoCurso, {new: true});
+        const cursoActualizado = await Curso.findByIdAndUpdate(cid, datosCursoActualizar, {new: true});
 
         res.json({
             ok: true,
@@ -185,7 +259,7 @@ const borrarCurso = async (req, res = response) => {
         if(!cursoDB){
             return res.status(404).json({
                 ok: false,
-                msg: 'El usuario con el id indicado no existe'
+                msg: 'El curso con el id indicado no existe'
             });
         }
 
@@ -193,7 +267,7 @@ const borrarCurso = async (req, res = response) => {
 
         return res.status(200).json({
             ok: true,
-            msg: 'El curso de código ' + cid + ' fue eliminado'
+            msg: 'El curso fue eliminado'
         })
         
     } catch (error) {
@@ -206,4 +280,11 @@ const borrarCurso = async (req, res = response) => {
    
 }
 
-module.exports = { getCursos, getCursoId, guardarCurso, actualizarCurso, borrarCurso }
+module.exports = { 
+                    getCursos, 
+                    getCursoId, 
+                    guardarCurso, 
+                    actualizarCurso, 
+                    borrarCurso,
+                    getCursosJornada
+                 }

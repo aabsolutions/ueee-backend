@@ -2,19 +2,39 @@ const { Schema, model } = require('mongoose');
 
 const CursoSchema = Schema({
     grado: {
-        type: Schema.Types.ObjectId,
-        ref: 'Grado'
+        type: String,
+        enum: ['8VO GRADO', '9NO GRADO', '10MO GRADO', '1ER CURSO', '2DO CURSO', '3ER CURSO'],
+        required: true
     },
-    especialidad: {
-        type: Schema.Types.ObjectId,
-        ref: 'Especialidad'
+    grado_abrev: {
+        type: String,
+        enum: ['8VO', '9NO', '10MO', '1ER BACH.', '2DO BACH.', '3ER BACH.'],
+        required: true
+    },
+    orden:{
+        type: Number
+    },
+    nivel: {
+        type: String,//EGB SUPERIOR
+        enum: ['INICIAL', 'EGB ELEMENTAL', 'EGB MEDIA', 'EGB SUPERIOR', 'BACHILLERATO GENERAL UNIFICADO', 'BACHILLERATO TECNICO'],
+        required: true
+    },
+    nivel_abrev: {
+        type: String,//EGB SUP.
+        enum: ['INI', 'EGB ELEM.', 'EGB MED.', 'EGB SUP.', 'BGU', 'BT'],
+        required: true
     },
     paralelo: {
         type: String,
         required: true
     },
+    especialidad: {
+        type: String,
+        enum: ['CONTABILIDAD', 'INFORMATICA', 'ELECTROMECANICA']
+    },
     jornada: {
         type: String,
+        enum: ['MATUTINA', 'VESPERTINA', 'NOCTURNA'],
         required: true
     },
     usuario: {

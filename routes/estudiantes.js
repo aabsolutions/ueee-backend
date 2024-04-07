@@ -4,7 +4,16 @@ ruta: /api/estudiantes
 const { check } = require('express-validator');
 const { Router } = require('express');
 
-const { getEstudiantes, guardarEstudiante, actualizarEstudiante, borrarEstudiante, getEstudianteId, asignacionEstudianteCurso, estadoEstudiante } = require('../controllers/estudiantes');
+const { 
+    getEstudiantes, 
+    guardarEstudiante, 
+    actualizarEstudiante, 
+    getEstudianteId, 
+    asignacionEstudianteCurso, 
+    estadoEstudiante,
+    getListadoEstudiantes
+} = require('../controllers/estudiantes');
+
 const { validarCampos } = require('../middlewares/validar-campos');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
@@ -13,6 +22,8 @@ const router = Router();
 //router.get(ruta_dentro, controlador)
 router.get('/', validarJWT, getEstudiantes);
 router.get('/:id', validarJWT, getEstudianteId);
+router.get('/listado/:cid', validarJWT, getListadoEstudiantes);
+
 
 router.post('/',[
     validarJWT,

@@ -1,46 +1,50 @@
 const { request } = require('express');
+const { mongoose } = require('mongoose');
+
 const { validarMongoID } = require('../middlewares/validar-mongoid');
+
 const Estudiante = require('../models/estudiante');
 const Curso = require('../models/curso');
-const mongoose = require('mongoose');
+const Estudiante_curso = require('../models/estudiante_curso');
+
 
 // const getEstudiantes = async (req, res = response) => {
 
 //     const jornada = Number(req.query.from)||0;
 //     const limit = Number(req.query.limit)||0;
 
-//     const estudiantes = await Estudiante.aggregate(
-//         [
-//             {
-//               $lookup:
-//                 {
-//                   from: "cursos",
-//                   localField: "curso",
-//                   foreignField: "_id",
-//                   pipeline: [
-//                     {
-//                       "$match": {
-//                         jornada: "VESPERTINA"
-//                       }
-//                     }
-//                   ],
-//                   as: "estudianteCurso",
-//                 },
-//             },
-//             {
-//               $unwind:
-//                 {
-//                   path: "$estudianteCurso",
-//                 },
-//             },
-//             {
-//               $match:
-//                 {
-//                   curso: new mongoose.Types.ObjectId('65242786c9ec609664253554')
-//                 },
-//             },
-//           ]
-//     )
+    // const estudiantes = await Estudiante.aggregate(
+    //     [
+    //         {
+    //           $lookup:
+    //             {
+    //               from: "cursos",
+    //               localField: "curso",
+    //               foreignField: "_id",
+    //               pipeline: [
+    //                 {
+    //                   "$match": {
+    //                     jornada: "VESPERTINA"
+    //                   }
+    //                 }
+    //               ],
+    //               as: "estudianteCurso",
+    //             },
+    //         },
+    //         {
+    //           $unwind:
+    //             {
+    //               path: "$estudianteCurso",
+    //             },
+    //         },
+    //         {
+    //           $match:
+    //             {
+    //               curso: new mongoose.Types.ObjectId('65242786c9ec609664253554')
+    //             },
+    //         },
+    //       ]
+    // )
 
 //     res.json({
 //         estudiantes
@@ -52,34 +56,13 @@ const getEstudiantes = async (req, res = response) => {
 
     const from = Number(req.query.from)||0;
     const limit = Number(req.query.limit)||0;
-    const curso = Curso;
 
     const [estudiantes, total] = await Promise.all([
         Estudiante
-                .find({},'cedula apellidos nombres f_nac sexo img estado curso usuario')
+                .find({},'')
                 .skip(from)
                 .limit(limit)
-                .sort({apellidos: 1,nombres: 1})
-                //.populate('curso','grado nivel paralelo jornada especialidad'),
-                .populate({
-                    path: 'curso',
-                    populate:[
-                        {
-                            path: 'grado', select: 'nombre nivelCorto'
-                        },
-                        {
-                            path: 'especialidad', select: 'nombreCorto'
-                        }
-                    ]
-                }),
-
-                // .populate({
-                //     path: "blogs", // populate blogs
-                //     populate: {
-                //        path: "comments" // in blogs, populate comments
-                //     }
-                //  })
-
+                .sort({apellidos: 1,nombres: 1}),
         Estudiante.countDocuments()
     ]);
 
@@ -88,7 +71,57 @@ const getEstudiantes = async (req, res = response) => {
         estudiantes,
         total
     });
+}
 
+const getListadoEstudiantes = async (req, res = response) => {
+
+    const from = Number(req.query.from)||0;
+    const limit = Number(req.query.limit)||0;
+    const curso = req.params.cid;
+
+    const [enrolamientos, total] = await Promise.all([
+        Estudiante_curso.aggregate([
+            [
+                {
+                  '$lookup': {
+                    'from': 'estudiantes', 
+                    'localField': 'estudiante', 
+                    'foreignField': '_id', 
+                    'as': 'estudiante'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$estudiante'
+                  }
+                }, {
+                  '$match': {
+                    'curso': new mongoose.Types.ObjectId(curso)
+                  }
+                }, {
+                  '$sort': {
+                    'estudiante.apellidos': 1
+                  }
+                },
+                {
+                    '$project': {
+                      'estudiante.cedula': 1,
+                      'estudiante.apellidos': 1,
+                      'estudiante.nombres': 1,
+                      'estudiante.f_nac': 1,
+                      'estudiante.sexo': 1,
+                    }
+                  }
+              ]
+        ])
+        ,
+        Estudiante_curso.find({curso: new mongoose.Types.ObjectId(curso)}).count()
+    ]);
+
+    res.json({
+        ok: true,
+        enrolamientos,
+        total
+    });
 }
 
 const getEstudianteId = async(req, res  = response) => {
@@ -112,14 +145,13 @@ const getEstudianteId = async(req, res  = response) => {
     }
 }
 
-
 const guardarEstudiante = async(req = request, res = response) => {
   
     const uid = req.uid;
     const datosNuevoEstudiante = new Estudiante({
-        usuario: uid,
+       usuario: uid,
         ...req.body
-    })
+    }) 
 
     const { cedula } = req.body;
     
@@ -210,9 +242,11 @@ const actualizarEstudiante = async (req, res = response) => {
 
 const asignacionEstudianteCurso = async (req, res = response) => {
 
-    const eid = req.params.id;
+    const estudiante = req.params.id;
     const usuario = req.uid;
     const { curso } = req.body;
+
+    const periodo = process.env.PERIODO;
 
     //validaciones de curso
 
@@ -232,29 +266,52 @@ const asignacionEstudianteCurso = async (req, res = response) => {
         });
     }
 
-    if(!validarMongoID(eid)){
+    //validaciones de estudiante
+
+    if(!validarMongoID(estudiante)){
         return res.status(500).json({
             ok: false,
             msg: 'El Id del estudiante enviado no es válido'
         });
     }
 
+    const estudianteDB = await Estudiante.findById(estudiante);
+
+    if(!estudianteDB){
+        return res.status(404).json({
+            ok: false,
+            msg: 'El estudiante con el id indicado no existe'
+        });
+    }
+
     try {
 
-        const estudianteDB = await Estudiante.findById(eid);
+        const datosAsignacion = {
+            periodo,
+            estudiante,
+            curso,
+            usuario
+        }
 
-        if(!estudianteDB){
+        const verificaExisteAsignacion = await Estudiante_curso.findOne({
+            $and: [{periodo},
+                   {estudiante},
+                   {curso}]
+        });
+
+        if(verificaExisteAsignacion){
             return res.status(404).json({
                 ok: false,
-                msg: 'El estudiante con el id indicado no existe'
+                msg: 'Ya existe una asignación realizada para el estudiante indicado'
             });
         }
 
-        const estudianteActualizado = await Estudiante.findByIdAndUpdate(eid, {curso, usuario}, {new: true});
+        const asignacionEstudianteCurso = new Estudiante_curso(datosAsignacion);
+        await asignacionEstudianteCurso.save();
 
         res.json({
             ok: true,
-            estudiante: estudianteActualizado
+            message: 'Asignación realizada corréctamente'
         });
 
     } catch (error) {
@@ -313,5 +370,6 @@ module.exports = {
     guardarEstudiante, 
     actualizarEstudiante, 
     estadoEstudiante,
-    asignacionEstudianteCurso
+    asignacionEstudianteCurso,
+    getListadoEstudiantes
 };

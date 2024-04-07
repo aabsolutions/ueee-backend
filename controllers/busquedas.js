@@ -53,7 +53,6 @@ const busquedaColeccion = async(req = request, res = response) => {
                 break;
             case 'cursos':
                     datosEncontrados = await Curso.find({$or:[{ grado: strBusquedaRegex },{ nivel: strBusquedaRegex },{ jornada: strBusquedaRegex },{ especialidad: strBusquedaRegex }]},'')
-                                                       .sort({grado:1, paralelo: 1})
                     break;
             default:
                 return res.status(400).json({
