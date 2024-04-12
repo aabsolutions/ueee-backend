@@ -7,6 +7,10 @@ const TitulacionSchema = Schema({
         ref: 'Estudiante_curso',
         required: true
     },
+    nota_grado: {
+        type: String,
+        required: true
+    },
     acta_public_id: {
         type: String
     },
@@ -26,7 +30,6 @@ const TitulacionSchema = Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: true
     },
 },
 {

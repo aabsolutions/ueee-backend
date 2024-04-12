@@ -5,7 +5,7 @@ const { check } = require('express-validator');
 const { Router } = require('express');
 
 const {
-    getListadoTitulacion, 
+    getListadoTitulacionEstudiantes,
     guardarTitulacion
 } = require('../controllers/titulacion');
 
@@ -14,7 +14,8 @@ const { validarJWT } = require('../middlewares/validar-jwt');
 
 const router = Router();
 
-router.get('/:cid', validarJWT, getListadoTitulacion);
+router.get('/estudiantes/:cid', validarJWT, getListadoTitulacionEstudiantes);
+
 router.put('/:enrid',[
     validarJWT,
     check('enrid','El código de enrolamiento es requerido').not().isEmpty(),

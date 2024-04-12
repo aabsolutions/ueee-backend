@@ -73,10 +73,9 @@ const getEstudiantes = async (req, res = response) => {
     });
 }
 
-const getListadoEstudiantes = async (req, res = response) => {
+const getListadoEstudiantesPorCurso = async (req, res = response) => {
 
-    const from = Number(req.query.from)||0;
-    const limit = Number(req.query.limit)||0;
+    const periodo = process.env.PERIODO_ACTIVO;
     const curso = req.params.cid;
 
     const [enrolamientos, total] = await Promise.all([
@@ -95,7 +94,9 @@ const getListadoEstudiantes = async (req, res = response) => {
                   }
                 }, {
                   '$match': {
-                    'curso': new mongoose.Types.ObjectId(curso)
+                    '$and': [{
+                                'periodo': periodo,
+                                'curso': new mongoose.Types.ObjectId(curso)}]
                   }
                 }, {
                   '$sort': {
@@ -104,6 +105,7 @@ const getListadoEstudiantes = async (req, res = response) => {
                 },
                 {
                     '$project': {
+                      'estudiante._id': 1,
                       'estudiante.cedula': 1,
                       'estudiante.apellidos': 1,
                       'estudiante.nombres': 1,
@@ -371,5 +373,5 @@ module.exports = {
     actualizarEstudiante, 
     estadoEstudiante,
     asignacionEstudianteCurso,
-    getListadoEstudiantes
+    getListadoEstudiantesPorCurso
 };

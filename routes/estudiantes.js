@@ -11,7 +11,7 @@ const {
     getEstudianteId, 
     asignacionEstudianteCurso, 
     estadoEstudiante,
-    getListadoEstudiantes
+    getListadoEstudiantesPorCurso
 } = require('../controllers/estudiantes');
 
 const { validarCampos } = require('../middlewares/validar-campos');
@@ -22,7 +22,7 @@ const router = Router();
 //router.get(ruta_dentro, controlador)
 router.get('/', validarJWT, getEstudiantes);
 router.get('/:id', validarJWT, getEstudianteId);
-router.get('/listado/:cid', validarJWT, getListadoEstudiantes);
+router.get('/listado/:cid', validarJWT, getListadoEstudiantesPorCurso);
 
 
 router.post('/',[

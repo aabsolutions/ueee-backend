@@ -1,25 +1,39 @@
 const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
     const menu = [
         {
-            titulo: 'Dashboard',
+            titulo: 'Personal',
             icono: 'mdi mdi-gauge',
             submenu: [
-              { titulo: 'Main', url: '/'}
+              { titulo: 'Dashboard', url: '/'},
             ]
           },
           {
-            titulo: 'Mantenimientos',
+            titulo: 'Estudiantes',
+            icono: 'mdi mdi-account-multiple',
+            submenu: [
+              { titulo: 'Registro', url: 'estudiantes/nuevo'},
+              { titulo: 'Asignación de curso', url: 'asignacion'}
+            ]
+          },
+          {
+            titulo: 'Cursos',
+            icono: 'mdi mdi-school',
+            submenu: [
+              { titulo: 'Administración', url: 'cursos'},
+            ]
+          },
+          {
+            titulo: 'Gestion escolar',
             icono: 'mdi mdi-folder-lock-open',
             submenu: [
-              { titulo: 'Cursos', url: 'cursos'},
-              { titulo: 'Estudiantes', url: 'estudiantes'}
+              { titulo: 'Titulación', url: 'gestion/titulacion'},
+              { titulo: 'Listados', url: 'gestion/listados'}
             ]
           }
     ]
 
     if( role === 'ADMIN_ROLE'){
-        menu[1].submenu.unshift({ titulo: 'Usuarios', url: 'usuarios'});
-        menu[1].submenu.unshift({ titulo: 'Titulación', url: 'titulacion'});
+        menu[0].submenu.push({ titulo: 'Usuarios', url: 'usuarios'});
     }
 
     return menu;

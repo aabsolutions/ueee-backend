@@ -1,17 +1,17 @@
-const { request } = require('express');
+const { request, response } = require('express');
 const { mongoose } = require('mongoose');
+const { populate } = require('dotenv');
 
+const Titulacion = require('../models/titulacion');
 
 const { validarMongoID } = require('../middlewares/validar-mongoid');
 
-const Titulacion = require('../models/titulacion');
-const { populate } = require('dotenv');
+const getListadoTitulacionEstudiantes = async (req = request, res = response) => {
 
-const getListadoTitulacion = async (req = request, res = response) => {
-
+    const periodo = req.query.periodo;
     const curso = req.params.cid;
 
-    const [listado, total] = await Promise.all([
+    const [titulados, total] = await Promise.all([
         Titulacion.aggregate(
             [ 
                 {
@@ -19,40 +19,40 @@ const getListadoTitulacion = async (req = request, res = response) => {
                     'from': 'estudiante_cursos', 
                     'localField': 'enrolamiento', 
                     'foreignField': '_id', 
-                    'as': 'result',
+                    'as': 'dataEstudiante',
                     'pipeline':[
                         {
                         '$lookup':{
                                 'from': 'estudiantes', 
                                 'localField': 'estudiante', 
                                 'foreignField': '_id', 
-                                'as': 'estudianteData',
+                                'as': 'estudiante',
                             }
                         },
                         {
-                        '$lookup':{
-                                'from': 'cursos', 
-                                'localField': 'curso', 
-                                'foreignField': '_id', 
-                                'as': 'cursoData',
-                            }
+                            '$unwind': {
+                                'path': '$estudiante'
+                              }
                         }
                     ]
                   }
                 }, {
                   '$unwind': {
-                    'path': '$result'
+                    'path': '$dataEstudiante'
                   }
                 }, {
                   '$match': {
-                    'result.curso': new mongoose.Types.ObjectId(curso)
+                    '$and': [{
+                            'dataEstudiante.periodo': periodo,
+                            'dataEstudiante.curso': new mongoose.Types.ObjectId(curso)}]
                   }
                 }, {
                     '$project': {
                         '_id': 1,
-                        'result.estudianteData.cedula': 1,
-                        'result.estudianteData.apellidos': 1,
-                        'result.estudianteData.nombres': 1,
+                        'nota_grado': 1,
+                        'dataEstudiante.estudiante.cedula': 1,
+                        'dataEstudiante.estudiante.apellidos': 1,
+                        'dataEstudiante.estudiante.nombres': 1,
                         'acta_public_id': 1,
                         'acta_secure_url': 1,
                         'titulo_public_id': 1,
@@ -63,15 +63,12 @@ const getListadoTitulacion = async (req = request, res = response) => {
         ),
         Titulacion.countDocuments()
     ]);
-
     res.json({
         ok: true,
-        listado,
+        titulados,
         total
     });
 }
-
-
 
 // const getEstudianteId = async(req, res  = response) => {
     
@@ -304,5 +301,5 @@ const guardarTitulacion = async(req = request, res = response) => {
 
 module.exports = { 
     guardarTitulacion,
-    getListadoTitulacion
+    getListadoTitulacionEstudiantes
 };

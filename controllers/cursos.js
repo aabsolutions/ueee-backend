@@ -22,15 +22,12 @@ const getCursos = async (req = request, res = response) => {
     });
 }
 
-const getCursosJornada = async (req = request, res = response) => {
+const getCursosFiltrados = async (req = request, res = response) => {
 
     const from = Number(req.query.from)||0;
     const limit = Number(req.query.limit)||0;
     const jor = Number(req.query.jor)||0;
     const niv = Number(req.query.niv)||0;
-    const esp = Number(req.query.esp)||0;
-
-
     
     switch (jor) {
         case 1:
@@ -80,6 +77,47 @@ const getCursosJornada = async (req = request, res = response) => {
     }
  
 }
+
+const getCursosFiltradosTitulacion = async (req = request, res = response) => {
+
+    const from = Number(req.query.from)||0;
+    const limit = Number(req.query.limit)||0;
+    const jor = Number(req.query.jor)||0;
+    
+    switch (jor) {
+        case 1:
+            jornada = 'MATUTINA';            
+            break;
+        case 2:
+            jornada = 'VESPERTINA';            
+            break;
+        case 3:
+            jornada = 'NOCTURNA';            
+            break;
+        default:
+            break;
+    }
+   
+    const cursos = [];
+    const total = 0;
+
+    if(jor>0){
+        const [cursos, total] = await Promise.all([
+            Curso
+                    .find({$and: [{jornada, $or: [{ nivel: 'BACHILLERATO GENERAL UNIFICADO'}, {nivel: 'BACHILLERATO TECNICO'}] }]},'')
+                    .skip(from)
+                    .limit(limit),
+            Curso   .find({jornada}).count()
+        ]);
+        res.json({
+            ok: true,
+            cursos,
+            total
+        });
+    }
+ 
+}
+
 
 const getCursoId = async(req, res  = response) => {
     
@@ -286,5 +324,6 @@ module.exports = {
                     guardarCurso, 
                     actualizarCurso, 
                     borrarCurso,
-                    getCursosJornada
+                    getCursosFiltrados,
+                    getCursosFiltradosTitulacion
                  }

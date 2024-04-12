@@ -6,7 +6,8 @@ const { Router } = require('express');
 
 const { 
         getCursos, 
-        getCursosJornada, 
+        getCursosFiltrados,
+        getCursosFiltradosTitulacion, 
         guardarCurso, 
         getCursoId, 
         actualizarCurso, 
@@ -21,7 +22,8 @@ const router = Router();
 //router.get(ruta_dentro, controlador)
 router.get('/', validarJWT, getCursos);
 router.get('/:id', validarJWT, getCursoId);
-router.get('/listado/filtro', validarJWT, getCursosJornada);
+router.get('/listado/filtro', validarJWT, getCursosFiltrados);
+router.get('/listado/titulacion/filtro', validarJWT, getCursosFiltradosTitulacion);
 
 
 router.post('/',[
