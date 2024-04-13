@@ -6,7 +6,7 @@ const { validarMongoID } = require('../middlewares/validar-mongoid');
 const Estudiante = require('../models/estudiante');
 const Curso = require('../models/curso');
 const Estudiante_curso = require('../models/estudiante_curso');
-
+//cambios realizados en la pc de abajo
 
 // const getEstudiantes = async (req, res = response) => {
 
