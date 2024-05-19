@@ -2,6 +2,7 @@ const { response, request } = require('express');
 const Curso = require('../models/curso');
 
 const { validarMongoID } = require('../middlewares/validar-mongoid');
+const { or } = require('ip');
 
 const getCursos = async (req = request, res = response) => {
 
@@ -64,9 +65,10 @@ const getCursosFiltrados = async (req = request, res = response) => {
     if(jor>0){
         const [cursos, total] = await Promise.all([
             Curso
-                    .find({$and: [{jornada, nivel}]},'')
+                    .find({$and: [{jornada, nivel, 'orden':{$gt: 0}}]},'')
                     .skip(from)
-                    .limit(limit),
+                    .limit(limit)
+                    .sort({orden:1}),
             Curso   .find({jornada}).count()
         ]);
         res.json({
@@ -98,13 +100,18 @@ const getCursosFiltradosTitulacion = async (req = request, res = response) => {
             break;
     }
    
-    const cursos = [];
-    const total = 0;
-
     if(jor>0){
         const [cursos, total] = await Promise.all([
             Curso
-                    .find({$and: [{jornada, $or: [{ nivel: 'BACHILLERATO GENERAL UNIFICADO'}, {nivel: 'BACHILLERATO TECNICO'}] }]},'')
+                    .find({$and: [{
+                                    jornada,
+                                    grado: '3ER CURSO', 
+                                    $or: [
+                                            { nivel: 'BACHILLERATO GENERAL UNIFICADO'},
+                                            { nivel: 'BACHILLERATO TECNICO'}
+                                         ]
+                                 }]
+                                },'')
                     .skip(from)
                     .limit(limit),
             Curso   .find({jornada}).count()
@@ -242,12 +249,13 @@ const actualizarCurso = async (req = request, res = response) => {
                 nivel_abrev,
                 paralelo,
                 jornada,
-                especialidad
+                especialidad,
         } = req.body;
 
         const verificaExiste = await Curso.findOne({
             $and: [{grado},
                    {grado_abrev},
+                   {orden},
                    {nivel},
                    {nivel_abrev},
                    {paralelo},
