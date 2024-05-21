@@ -36,6 +36,34 @@ const EstudianteSchema = Schema({
     celular: {
         type: String
     },
+    discapacidad: {
+        type: Number,
+        default: false
+    },
+    discapacidad_detalle: {
+        type: String
+    },
+    enfermedad_catastrofica: {
+        type: Number,
+        default: false
+    },
+    enfermedad_catastrofica_detalle: {
+        type: String
+    },
+    alergia: {
+        type: Number,
+        default: false
+    },
+    alergia_detalle: {
+        type: String
+    },
+    embarazo: {
+        type: Number,
+        default: false
+    },
+    embarazo_fecha: {
+        type: String
+    },
     representante_cedula: {
         type: String
     },
@@ -57,6 +85,9 @@ const EstudianteSchema = Schema({
     padre_celular: {
         type: String
     },
+    padre_email: {
+        type: String
+    },
     madre_cedula: {
         type: String
     },
@@ -66,32 +97,7 @@ const EstudianteSchema = Schema({
     madre_celular: {
         type: String
     },
-    discapacidad: {
-        type: Boolean,
-        default: false
-    },
-    discapacidad_detalle: {
-        type: String
-    },
-    enfermedad_catastrofica: {
-        type: Boolean,
-        default: false
-    },
-    enfermedad_catastrofica_detalle: {
-        type: String
-    },
-    alergia: {
-        type: Boolean,
-        default: false
-    },
-    alergia_detalle: {
-        type: String
-    },
-    embarazo: {
-        type: Boolean,
-        default: false
-    },
-    embarazo_fecha: {
+    madre_email: {
         type: String
     },
     img: {
