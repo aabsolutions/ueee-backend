@@ -47,9 +47,8 @@ const busquedaColeccion = async(req = request, res = response) => {
             case 'estudiantes':
                 datosEncontrados = await Estudiante.find({$or:[{ apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }]},'')
                                                     .skip(0)
-                                                    .limit(5)
+                                                    .limit(0)
                                                     .sort({apellidos: 1,nombres: 1})
-                                                    .populate('curso','grado nivel paralelo jornada especialidad')
                 break;
             case 'cursos':
                     datosEncontrados = await Curso.find({$or:[{ grado: strBusquedaRegex },{ nivel: strBusquedaRegex },{ jornada: strBusquedaRegex },{ especialidad: strBusquedaRegex }]},'')

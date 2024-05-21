@@ -24,6 +24,9 @@ const EstudianteSchema = Schema({
         type: Number,
         required: true
     },
+    ciudad: {
+        type: String
+    },
     direccion: {
         type: String
     },
@@ -87,6 +90,9 @@ const EstudianteSchema = Schema({
     embarazo: {
         type: Boolean,
         default: false
+    },
+    embarazo_fecha: {
+        type: String
     },
     img: {
         type: String
