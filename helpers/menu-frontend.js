@@ -12,7 +12,8 @@ const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
             icono: 'mdi mdi-account-multiple',
             submenu: [
               { titulo: 'Registro', url: 'estudiantes/nuevo'},
-              { titulo: 'Asignación de curso', url: 'asignacion'}
+              { titulo: 'Asignación de curso', url: 'estudiantes/asignacion'},
+              { titulo: 'Perfil estudiantil', url: 'estudiantes/perfil'}
             ]
           },
           {
