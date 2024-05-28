@@ -12,7 +12,8 @@ const CursoSchema = Schema({
         required: true
     },
     orden:{
-        type: Number
+        type: Number,
+        default: 0
     },
     nivel: {
         type: String,//EGB SUPERIOR
@@ -30,7 +31,7 @@ const CursoSchema = Schema({
     },
     especialidad: {
         type: String,
-        enum: ['CONTABILIDAD', 'INFORMATICA', 'ELECTROMECANICA']
+        enum: ['CONTABILIDAD', 'INFORMATICA', 'ELECTROMECANICA','']
     },
     jornada: {
         type: String,
