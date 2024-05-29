@@ -48,6 +48,7 @@ router.put('/:id',[
     validarCampos
 ] 
 ,actualizarEstudiante);
+
 router.put('/asignacion/:id',[
     validarJWT,
     check('curso','El id del curso es requerido').not().isEmpty(),

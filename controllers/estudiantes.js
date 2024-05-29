@@ -299,7 +299,9 @@ const asignacionEstudianteCurso = async (req, res = response) => {
 
     const estudiante = req.params.id;
     const usuario = req.uid;
-    const { curso } = req.body;
+    const { curso, matricula } = req.body;
+
+    
 
     //validaciones de curso
 
@@ -348,23 +350,25 @@ const asignacionEstudianteCurso = async (req, res = response) => {
             usuario
         }
 
-        const verificaExisteAsignacion = await Estudiante_curso.findOne({
+        const verificaExisteAsignacionIgual = await Estudiante_curso.findOne({
             $and: [{periodo},
                    {estudiante},
                    {curso}]
         });
 
-        if(verificaExisteAsignacion){
+        if(verificaExisteAsignacionIgual){
             return res.status(404).json({
                 ok: false,
-                msg: 'Ya existe una asignación realizada para el estudiante indicado'
+                msg: 'El estudiante ya se encuentra asignado al curso indicado'
             });
         }
 
-
-        //debe crearse la actualización
-        const asignacionEstudianteCurso = new Estudiante_curso(datosAsignacion);
-        await asignacionEstudianteCurso.save();
+        if(matricula!=0){
+            actualizaAsignacionEstudianteCurso = await Estudiante_curso.findByIdAndUpdate(new mongoose.Types.ObjectId(matricula), datosAsignacion, {new: true});
+        }else{
+            const asignacionEstudianteCurso = new Estudiante_curso(datosAsignacion);
+            await asignacionEstudianteCurso.save();
+        }
 
         res.json({
             ok: true,
