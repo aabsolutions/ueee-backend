@@ -9,6 +9,7 @@ const {
     guardarEstudiante, 
     actualizarEstudiante, 
     getEstudianteId, 
+    getEstudianteMatricula,
     asignacionEstudianteCurso, 
     estadoEstudiante,
     getListadoEstudiantesPorCurso
@@ -23,6 +24,8 @@ const router = Router();
 router.get('/', validarJWT, getEstudiantes);
 router.get('/:id', validarJWT, getEstudianteId);
 router.get('/listado/:cid', validarJWT, getListadoEstudiantesPorCurso);
+router.get('/matricula/:eid', validarJWT, getEstudianteMatricula);
+
 
 
 router.post('/',[

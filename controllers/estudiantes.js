@@ -147,6 +147,59 @@ const getEstudianteId = async(req, res  = response) => {
     }
 }
 
+const getEstudianteMatricula = async(req, res  = response) => {
+    
+    const eid = req.params.eid;
+    const periodo = process.env.PERIODO_ACTIVO;
+
+    try {
+        const matricula = await Estudiante_curso.aggregate(
+            
+            [
+                {
+                  $lookup: {
+                    from: 'cursos',
+                    localField: 'curso',
+                    foreignField: '_id',
+                    as: 'datosCurso'
+                  }
+                },
+                { $unwind: { path: '$datosCurso' } },
+                {
+                  $match: {
+                    $and: [
+                      {
+                        periodo: periodo,
+                        estudiante: new mongoose.Types.ObjectId(eid)
+                      }
+                    ]
+                  }
+                },
+                {
+                  $project: {
+                    'datosCurso._id': 1,
+                    'datosCurso.grado': 1,
+                    'datosCurso.nivel': 1,
+                    'datosCurso.paralelo': 1,
+                    'datosCurso.jornada': 1,
+                    'datosCurso.especialidad': 1
+                  }
+                }
+              ]
+        );
+        res.json({
+            ok: true,
+            matricula
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            ok: true,
+            msg: 'Estudiante no encontrado'
+        });
+    }
+}
+
 const guardarEstudiante = async(req = request, res = response) => {
   
     const uid = req.uid;
@@ -368,7 +421,8 @@ const estadoEstudiante = async (req, res = response) => {
 
 module.exports = { 
     getEstudiantes,
-    getEstudianteId, 
+    getEstudianteId,
+    getEstudianteMatricula, 
     guardarEstudiante, 
     actualizarEstudiante, 
     estadoEstudiante,
