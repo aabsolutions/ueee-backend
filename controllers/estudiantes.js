@@ -301,8 +301,6 @@ const asignacionEstudianteCurso = async (req, res = response) => {
     const usuario = req.uid;
     const { curso } = req.body;
 
-    const periodo = process.env.PERIODO;
-
     //validaciones de curso
 
     if(!validarMongoID(curso)){
@@ -341,6 +339,8 @@ const asignacionEstudianteCurso = async (req, res = response) => {
 
     try {
 
+        const periodo = process.env.PERIODO_ACTIVO;
+
         const datosAsignacion = {
             periodo,
             estudiante,
@@ -361,6 +361,8 @@ const asignacionEstudianteCurso = async (req, res = response) => {
             });
         }
 
+
+        //debe crearse la actualización
         const asignacionEstudianteCurso = new Estudiante_curso(datosAsignacion);
         await asignacionEstudianteCurso.save();
 
