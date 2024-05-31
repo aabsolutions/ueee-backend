@@ -39,6 +39,57 @@ const busquedaColeccion = async(req = request, res = response) => {
 
     let datosEncontrados = [];
 
+    // [
+    //     {
+    //       '$lookup': {
+    //         'from': 'estudiante_cursos', 
+    //         'localField': '_id', 
+    //         'foreignField': 'estudiante', 
+    //         'as': 'datosMatricula', 
+    //         'pipeline': [
+    //           {
+    //             '$lookup': {
+    //               'from': 'cursos', 
+    //               'localField': 'curso', 
+    //               'foreignField': '_id', 
+    //               'as': 'datosCurso'
+    //             }
+    //           }, {
+    //             '$unwind': {
+    //               'path': '$datosCurso'
+    //             }
+    //           }
+    //         ]
+    //       }
+    //     }, {
+    //       '$unwind': {
+    //         'path': '$datosMatricula'
+    //       }
+    //     }, {
+    //       '$match': {
+    //         '$and': [
+    //           {
+    //             '_id': new ObjectId('6646b1055e2d24fd87d67f3a'), 
+    //             'datosMatricula.periodo': '2024-2025'
+    //           }
+    //         ]
+    //       }
+    //     }, {
+    //       '$project': {
+    //         '_id': 1, 
+    //         'cedula': 1, 
+    //         'apellidos': 1, 
+    //         'nombres': 1, 
+    //         'sexo': 1, 
+    //         'datosMatricula.datosCurso.grado': 1, 
+    //         'datosMatricula.datosCurso.nivel': 1, 
+    //         'datosMatricula.datosCurso.paralelo': 1, 
+    //         'datosMatricula.datosCurso.especialidad': 1, 
+    //         'datosMatricula.datosCurso.jornada': 1
+    //       }
+    //     }
+    //   ]
+
     try {
         switch (tabla) {
             case 'usuarios':
