@@ -36,59 +36,9 @@ const busquedaColeccion = async(req = request, res = response) => {
     const tabla = req.params.tbl;
     const strBusqueda = req.params.str;
     const strBusquedaRegex = new RegExp(strBusqueda,'i');
+    const periodo = process.env.PERIODO_ACTIVO;
 
     let datosEncontrados = [];
-
-    // [
-    //     {
-    //       '$lookup': {
-    //         'from': 'estudiante_cursos', 
-    //         'localField': '_id', 
-    //         'foreignField': 'estudiante', 
-    //         'as': 'datosMatricula', 
-    //         'pipeline': [
-    //           {
-    //             '$lookup': {
-    //               'from': 'cursos', 
-    //               'localField': 'curso', 
-    //               'foreignField': '_id', 
-    //               'as': 'datosCurso'
-    //             }
-    //           }, {
-    //             '$unwind': {
-    //               'path': '$datosCurso'
-    //             }
-    //           }
-    //         ]
-    //       }
-    //     }, {
-    //       '$unwind': {
-    //         'path': '$datosMatricula'
-    //       }
-    //     }, {
-    //       '$match': {
-    //         '$and': [
-    //           {
-    //             '_id': new ObjectId('6646b1055e2d24fd87d67f3a'), 
-    //             'datosMatricula.periodo': '2024-2025'
-    //           }
-    //         ]
-    //       }
-    //     }, {
-    //       '$project': {
-    //         '_id': 1, 
-    //         'cedula': 1, 
-    //         'apellidos': 1, 
-    //         'nombres': 1, 
-    //         'sexo': 1, 
-    //         'datosMatricula.datosCurso.grado': 1, 
-    //         'datosMatricula.datosCurso.nivel': 1, 
-    //         'datosMatricula.datosCurso.paralelo': 1, 
-    //         'datosMatricula.datosCurso.especialidad': 1, 
-    //         'datosMatricula.datosCurso.jornada': 1
-    //       }
-    //     }
-    //   ]
 
     try {
         switch (tabla) {
@@ -96,10 +46,69 @@ const busquedaColeccion = async(req = request, res = response) => {
                 datosEncontrados = await Usuario.find({ nombre: strBusquedaRegex },'');    
                 break;
             case 'estudiantes':
-                datosEncontrados = await Estudiante.find({$or:[{ apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }]},'')
-                                                    .skip(0)
-                                                    .limit(0)
-                                                    .sort({apellidos: 1,nombres: 1})
+                // datosEncontrados = await Estudiante.find({$or:[{ apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }]},'')
+                //                                     .skip(0)
+                //                                     .limit(0)
+                //                                     .sort({apellidos: 1,nombres: 1})
+                datosEncontrados = await Estudiante.aggregate([
+                             {
+                              '$lookup': {
+                                'from': 'estudiante_cursos', 
+                                'localField': '_id', 
+                                'foreignField': 'estudiante', 
+                                'as': 'datosMatricula', 
+                                'pipeline': [
+                                  {
+                                    '$lookup': {
+                                      'from': 'cursos', 
+                                      'localField': 'curso', 
+                                      'foreignField': '_id', 
+                                      'as': 'datosCurso'
+                                    }
+                                  }, {
+                                    '$unwind': {
+                                      'path': '$datosCurso'
+                                    }
+                                  }
+                                ]
+                              }
+                            }, {
+                              '$unwind': {
+                                'path': '$datosMatricula'
+                              }
+                            }, {
+                              '$match': {
+                                '$and': [
+                                  {
+                                    '$or': [
+                                            { apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }
+                                        ], 
+                                    'datosMatricula.periodo': periodo
+                                  }
+                                ]
+                              }
+                            }, {
+                              '$project': {
+                                '_id': 1, 
+                                'cedula': 1, 
+                                'apellidos': 1, 
+                                'nombres': 1, 
+                                'sexo': 1, 
+                                'datosMatricula.datosCurso.grado': 1, 
+                                'datosMatricula.datosCurso.nivel': 1, 
+                                'datosMatricula.datosCurso.paralelo': 1, 
+                                'datosMatricula.datosCurso.especialidad': 1, 
+                                'datosMatricula.datosCurso.jornada': 1
+                              }
+                            },
+                            {
+                                '$sort':{
+                                    'apellidos': 1, 
+                                    'nombres': 1 
+                                }
+                            }
+                ]);
+                
                 break;
             case 'cursos':
                     datosEncontrados = await Curso.find({$or:[{ grado: strBusquedaRegex },{ nivel: strBusquedaRegex },{ jornada: strBusquedaRegex },{ especialidad: strBusquedaRegex }]},'')

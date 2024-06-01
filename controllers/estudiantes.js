@@ -6,51 +6,6 @@ const { validarMongoID } = require('../middlewares/validar-mongoid');
 const Estudiante = require('../models/estudiante');
 const Curso = require('../models/curso');
 const Estudiante_curso = require('../models/estudiante_curso');
-//cambios realizados en la pc de abajo
-
-// const getEstudiantes = async (req, res = response) => {
-
-//     const jornada = Number(req.query.from)||0;
-//     const limit = Number(req.query.limit)||0;
-
-    // const estudiantes = await Estudiante.aggregate(
-    //     [
-    //         {
-    //           $lookup:
-    //             {
-    //               from: "cursos",
-    //               localField: "curso",
-    //               foreignField: "_id",
-    //               pipeline: [
-    //                 {
-    //                   "$match": {
-    //                     jornada: "VESPERTINA"
-    //                   }
-    //                 }
-    //               ],
-    //               as: "estudianteCurso",
-    //             },
-    //         },
-    //         {
-    //           $unwind:
-    //             {
-    //               path: "$estudianteCurso",
-    //             },
-    //         },
-    //         {
-    //           $match:
-    //             {
-    //               curso: new mongoose.Types.ObjectId('65242786c9ec609664253554')
-    //             },
-    //         },
-    //       ]
-    // )
-
-//     res.json({
-//         estudiantes
-//     });
-
-// }
 
 const getEstudiantes = async (req, res = response) => {
 
