@@ -78,14 +78,13 @@ const busquedaColeccion = async(req = request, res = response) => {
                               }
                             }, {
                               '$match': {
-                                '$and': [
-                                  {
+
                                     '$or': [
                                             { 'apellidos': strBusquedaRegex },{ 'nombres': strBusquedaRegex }
-                                        ], 
-                                    'datosMatricula.periodo': periodo
-                                  }
-                                ]
+                                        ] 
+                                    //'datosMatricula.periodo': periodo
+                                  
+                                
                               }
                             }, {
                               '$project': {
