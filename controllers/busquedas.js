@@ -81,7 +81,7 @@ const busquedaColeccion = async(req = request, res = response) => {
                                 '$and': [
                                   {
                                     '$or': [
-                                            { apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }
+                                            { 'apellidos': strBusquedaRegex },{ 'nombres': strBusquedaRegex }
                                         ], 
                                     'datosMatricula.periodo': periodo
                                   }
