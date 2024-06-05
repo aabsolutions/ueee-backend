@@ -45,7 +45,35 @@ const busquedaColeccion = async(req = request, res = response) => {
             case 'usuarios':
                 datosEncontrados = await Usuario.find({ nombre: strBusquedaRegex },'');    
                 break;
-            case 'estudiantes':
+                case 'estudiantes_por_asignar':
+                  datosEncontrados = await Estudiante.aggregate([
+                                  {
+                                    '$lookup': {
+                                      'from': 'estudiante_cursos', 
+                                      'localField': '_id', 
+                                      'foreignField': 'estudiante', 
+                                      'as': 'datosMatricula'
+                                    }
+                                  }, {
+                                    '$unwind': {
+                                      'path': '$datosMatricula', 
+                                      'preserveNullAndEmptyArrays': true
+                                    }
+                                  }, {
+                                    '$match': {
+                                      'datosMatricula._id': null
+                                    }
+                                  },
+                                  {
+                                      '$sort':{
+                                          'apellidos': 1, 
+                                          'nombres': 1 
+                                      }
+                                  }
+                  ]);
+                  break;
+              
+            case 'estudiantes_matriculados':
                 // datosEncontrados = await Estudiante.find({$or:[{ apellidos: strBusquedaRegex },{ nombres: strBusquedaRegex }]},'')
                 //                                     .skip(0)
                 //                                     .limit(0)
@@ -74,15 +102,17 @@ const busquedaColeccion = async(req = request, res = response) => {
                               }
                             }, {
                               '$unwind': {
-                                'path': '$datosMatricula'
+                                'path': '$datosMatricula',
+                                //para poder conservar los estudiantes que no tienen matricula asignada en la proyección de la consulta 
+                                'preserveNullAndEmptyArrays': true
                               }
                             }, {
                               '$match': {
 
                                     '$or': [
                                             { 'apellidos': strBusquedaRegex },{ 'nombres': strBusquedaRegex }
-                                        ] 
-                                    //'datosMatricula.periodo': periodo
+                                        ],
+                                    'datosMatricula.periodo': periodo
                                   
                                 
                               }
