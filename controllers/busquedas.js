@@ -3,6 +3,8 @@ const { response, request } = require('express');
 const Estudiante = require('../models/estudiante');
 const Curso = require('../models/curso');
 const Usuario = require('../models/usuario');
+const { result } = require('lodash');
+const { $and } = require('sift');
 
 const busquedaALL = async(req = request, res = response) => {
 
@@ -45,31 +47,38 @@ const busquedaColeccion = async(req = request, res = response) => {
             case 'usuarios':
                 datosEncontrados = await Usuario.find({ nombre: strBusquedaRegex },'');    
                 break;
-                case 'estudiantes_por_asignar':
+            case 'estudiantes_por_asignar':
                   datosEncontrados = await Estudiante.aggregate([
-                                  {
-                                    '$lookup': {
-                                      'from': 'estudiante_cursos', 
-                                      'localField': '_id', 
-                                      'foreignField': 'estudiante', 
-                                      'as': 'datosMatricula'
-                                    }
-                                  }, {
-                                    '$unwind': {
-                                      'path': '$datosMatricula', 
-                                      'preserveNullAndEmptyArrays': true
-                                    }
-                                  }, {
-                                    '$match': {
-                                      'datosMatricula._id': null
-                                    }
-                                  },
-                                  {
-                                      '$sort':{
-                                          'apellidos': 1, 
-                                          'nombres': 1 
-                                      }
-                                  }
+                    {
+                      '$lookup': {
+                        'from': 'estudiante_cursos', 
+                        'localField': '_id', 
+                        'foreignField': 'estudiante', 
+                        'as': 'result'
+                      }
+                    }, {
+                      '$match': {
+                        '$and':[
+                          {
+                            '$or': [
+                              { 'apellidos': strBusquedaRegex },{ 'nombres': strBusquedaRegex }
+                             ],
+                            'result': []
+                          }
+                        ]
+                      }
+                    }
+                    , {
+                      '$unset': [
+                        'f_nac', 'sexo', 'createdAt', 'updatedAt', 'usuario', 'result'
+                      ]
+                    },
+                      {
+                        '$sort':{
+                            'apellidos': 1, 
+                            'nombres': 1 
+                        }
+                    }
                   ]);
                   break;
               
