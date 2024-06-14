@@ -33,6 +33,7 @@ const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
 
     if( role === 'ADMIN_ROLE'){
         menu[0].submenu.push({ titulo: 'Usuarios', url: 'usuarios'});
+        menu[0].submenu.push({ titulo: 'Registro', url: 'registro'});
         menu[1].submenu.push({ titulo: 'Asignación', url: 'estudiantes/asignacion'});
         menu[3].submenu.push({ titulo: 'Titulación', url: 'gestion/titulacion'});
     }
