@@ -19,7 +19,8 @@ const getMenuFrontEnd = ( role = 'USER_ROLE' ) => {
             titulo: 'Cursos',
             icono: 'mdi mdi-school',
             submenu: [
-              { titulo: 'Administración', url: 'cursos'}
+              { titulo: 'Administración', url: 'cursos'},
+              { titulo: 'Oferta', url: 'cursos/oferta'}
             ]
           },
           {

@@ -1,5 +1,6 @@
 const { response, request } = require('express');
 const Curso = require('../models/curso');
+const Estudiante_curso = require('../models/estudiante_curso');
 
 const { validarMongoID } = require('../middlewares/validar-mongoid');
 const { or } = require('ip');
@@ -159,6 +160,72 @@ const getCursoId = async(req, res  = response) => {
     }
 }
 
+const getOfertaActiva = async(req, res  = response) => {
+    
+    const eid = req.params.eid;
+    const periodo = process.env.PERIODO_ACTIVO;
+
+    try {
+        const oferta = await Estudiante_curso.aggregate(
+            
+            [
+                {
+                  '$match': {
+                    '$and': [
+                      {
+                        'periodo': '2024-2025'
+                      }
+                    ]
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$curso', 
+                    'estudiantes': {
+                      '$count': {}
+                    }
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'cursos', 
+                    'localField': '_id', 
+                    'foreignField': '_id', 
+                    'as': 'result'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$result'
+                  }
+                }, {
+                  '$project': {
+                    'estudiantes': 1, 
+                    'result.grado': 1, 
+                    'result.nivel': 1, 
+                    'result.paralelo': 1, 
+                    'result.especialidad': 1, 
+                    'result.jornada': 1, 
+                    'result.orden': 1
+                  }
+                }, {
+                  '$sort': {
+                    'result.jornada': 1, 
+                    'result.orden': 1
+                  }
+                }
+              ]
+        );
+        res.json({
+            ok: true,
+            oferta
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            ok: true,
+            msg: 'Error de lectura de la base de datos'
+        });
+    }
+    
+}
 
 const guardarCurso = async(req = request, res = response) => {
     
@@ -333,5 +400,6 @@ module.exports = {
                     actualizarCurso, 
                     borrarCurso,
                     getCursosFiltrados,
-                    getCursosFiltradosTitulacion
+                    getCursosFiltradosTitulacion,
+                    getOfertaActiva
                  }
