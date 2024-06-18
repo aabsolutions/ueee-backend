@@ -198,8 +198,8 @@ const getOfertaActiva = async(req, res  = response) => {
                 }, {
                   '$project': {
                     'estudiantes': 1, 
-                    'result.grado': 1, 
-                    'result.nivel': 1, 
+                    'result.grado_abrev': 1, 
+                    'result.nivel_abrev': 1, 
                     'result.paralelo': 1, 
                     'result.especialidad': 1, 
                     'result.jornada': 1, 
