@@ -12,7 +12,8 @@ const {
         guardarCurso, 
         getCursoId, 
         actualizarCurso, 
-        borrarCurso
+        borrarCurso,
+        getTotalesOferta
     } = require('../controllers/cursos');
 
 const { validarCampos } = require('../middlewares/validar-campos');
@@ -22,7 +23,8 @@ const router = Router();
 
 //router.get(ruta_dentro, controlador)
 router.get('/', validarJWT, getCursos);
-router.get('/oferta', validarJWT, getOfertaActiva);
+router.get('/oferta/:jornada', validarJWT, getOfertaActiva);
+router.get('/oferta/totales/:jornada', validarJWT, getTotalesOferta);
 router.get('/:id', validarJWT, getCursoId);
 router.get('/listado/filtro', validarJWT, getCursosFiltrados);
 router.get('/listado/titulacion/filtro', validarJWT, getCursosFiltradosTitulacion);

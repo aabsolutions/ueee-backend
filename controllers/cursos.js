@@ -162,7 +162,7 @@ const getCursoId = async(req, res  = response) => {
 
 const getOfertaActiva = async(req, res  = response) => {
     
-    const eid = req.params.eid;
+    const jor = req.params.jornada;
     const periodo = process.env.PERIODO_ACTIVO;
 
     try {
@@ -173,7 +173,7 @@ const getOfertaActiva = async(req, res  = response) => {
                   '$match': {
                     '$and': [
                       {
-                        'periodo': '2024-2025'
+                        'periodo': periodo
                       }
                     ]
                   }
@@ -210,7 +210,12 @@ const getOfertaActiva = async(req, res  = response) => {
                     'result.jornada': 1, 
                     'result.orden': 1
                   }
-                }
+                },
+                {
+                    '$match': {
+                      'result.jornada': jor
+                    }
+                  }
               ]
         );
         res.json({
@@ -225,6 +230,77 @@ const getOfertaActiva = async(req, res  = response) => {
         });
     }
     
+}
+
+const getTotalesOferta = async (req = request, res = response) => {
+
+    const jor = req.params.jornada;
+    const periodo = process.env.PERIODO_ACTIVO;
+ 
+    const [totalCursos, totalEstudiantes] = await Promise.all([
+        Estudiante_curso.aggregate(
+            [
+                {
+                  '$lookup': {
+                    'from': 'cursos', 
+                    'localField': 'curso', 
+                    'foreignField': '_id', 
+                    'as': 'result'
+                  }
+                }, {
+                  '$match': {
+                    'periodo': periodo, 
+                    'result.jornada': jor
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$curso'
+                  }
+                }, {
+                  '$count': 'curso'
+                }
+              ]
+        )
+        ,
+        Estudiante_curso.aggregate(
+            [
+                {
+                  '$lookup': {
+                    'from': 'cursos', 
+                    'localField': 'curso', 
+                    'foreignField': '_id', 
+                    'as': 'result'
+                  }
+                }, {
+                  '$match': {
+                    '$and': [
+                      {
+                        'result.jornada': jor, 
+                        'periodo': periodo
+                      }
+                    ]
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$estudiantes', 
+                    'estudiantes': {
+                      '$count': {}
+                    }
+                  }
+                }, {
+                    '$project': {
+                      'estudiantes': 1,
+                      '_id': 0
+                    }
+                  }
+              ]
+        )        
+    ]);
+    res.json({
+        ok: true,
+        totalCursos,
+        totalEstudiantes
+    });
 }
 
 const guardarCurso = async(req = request, res = response) => {
@@ -401,5 +477,6 @@ module.exports = {
                     borrarCurso,
                     getCursosFiltrados,
                     getCursosFiltradosTitulacion,
-                    getOfertaActiva
+                    getOfertaActiva,
+                    getTotalesOferta
                  }
