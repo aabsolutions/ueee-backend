@@ -13,7 +13,7 @@ const getUsuarios = async (req, res = response) => {
         Usuario
                 .find({},'email nombre role img')
                 .skip(0)
-                .limit(5),
+                .limit(0),
         Usuario.countDocuments()
     ]);
 
