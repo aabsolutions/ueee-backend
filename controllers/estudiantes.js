@@ -4,8 +4,9 @@ const { mongoose } = require('mongoose');
 const { validarMongoID } = require('../middlewares/validar-mongoid');
 
 const Estudiante = require('../models/estudiante');
-const Curso = require('../models/curso');
 const Estudiante_curso = require('../models/estudiante_curso');
+const Estudiante_imc = require('../models/estudiante_imc');
+const Curso = require('../models/curso');
 
 const getEstudiantes = async (req, res = response) => {
 
@@ -250,6 +251,118 @@ const actualizarEstudiante = async (req, res = response) => {
 
 }
 
+const registroEstudianteImc = async (req, res = response) => {
+
+    const estudiante = req.params.id;
+    const usuario = req.uid;
+    const { periodo, peso, talla, fecha_toma } = req.body;
+
+    //validaciones de estudiante
+
+    if(!validarMongoID(estudiante)){
+        return res.status(500).json({
+            ok: false,
+            msg: 'El Id del estudiante enviado no es válido'
+        });
+    }
+
+    const estudianteDB = await Estudiante.findById(estudiante);
+
+    if(!estudianteDB){
+        return res.status(404).json({
+            ok: false,
+            msg: 'El estudiante con el id indicado no existe'
+        });
+    }
+
+    try {
+
+        const datosRegistro = {
+            periodo,
+            estudiante,
+            peso,
+            talla,
+            fecha_toma,
+            usuario
+        }
+
+        const verificaExisteRegistroIgual = await Estudiante_imc.findOne({
+            $and: [{periodo},
+                   {estudiante}]
+        });
+
+        if(verificaExisteRegistroIgual){
+            return res.status(404).json({
+                ok: false,
+                msg: 'Ya existe una toma registrada para ese periodo'
+            });
+        }
+
+        const registroEstudianteImc = new Estudiante_imc(datosRegistro);
+        await registroEstudianteImc.save();
+
+
+        res.json({
+            ok: true,
+            message: 'Registro realizado corréctamente'
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado'
+        })
+    }
+}
+
+const actualizarRegistroEstudianteImc = async (req, res = response) => {
+
+    const rid = req.params.id;
+    const usuario = req.uid;
+    const { peso, talla } = req.body;
+
+    //validaciones de estudiante
+
+    if(!validarMongoID(rid)){
+        return res.status(500).json({
+            ok: false,
+            msg: 'El Id del registro IMC enviado no es válido'
+        });
+    }
+
+    const registroImcDB = await Estudiante_imc.findById(rid);
+
+    if(!registroImcDB){
+        return res.status(404).json({
+            ok: false,
+            msg: 'El registro con el id indicado no existe'
+        });
+    }
+
+    try {
+
+        const datosActualizar = {
+            peso,
+            talla,
+            usuario
+        }
+        await Estudiante_imc.findByIdAndUpdate(rid, datosActualizar, {new: true});
+
+        res.json({
+            ok: true,
+            message: 'Registro actualizado corréctamente'
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado'
+        })
+    }
+}
+
 const asignacionEstudianteCurso = async (req, res = response) => {
 
     const estudiante = req.params.id;
@@ -381,12 +494,14 @@ const estadoEstudiante = async (req, res = response) => {
 }
 
 module.exports = { 
+    actualizarEstudiante,
+    actualizarRegistroEstudianteImc, 
+    asignacionEstudianteCurso,
+    estadoEstudiante,
     getEstudiantes,
     getEstudianteId,
     getEstudianteMatricula, 
+    getListadoEstudiantesPorCurso,
     guardarEstudiante, 
-    actualizarEstudiante, 
-    estadoEstudiante,
-    asignacionEstudianteCurso,
-    getListadoEstudiantesPorCurso
+    registroEstudianteImc
 };

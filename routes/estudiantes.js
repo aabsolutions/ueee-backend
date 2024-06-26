@@ -5,14 +5,16 @@ const { check } = require('express-validator');
 const { Router } = require('express');
 
 const { 
-    getEstudiantes, 
-    guardarEstudiante, 
     actualizarEstudiante, 
-    getEstudianteId, 
-    getEstudianteMatricula,
+    actualizarRegistroEstudianteImc,
     asignacionEstudianteCurso, 
     estadoEstudiante,
-    getListadoEstudiantesPorCurso
+    getEstudiantes, 
+    getEstudianteId, 
+    getEstudianteMatricula,
+    getListadoEstudiantesPorCurso,
+    guardarEstudiante, 
+    registroEstudianteImc
 } = require('../controllers/estudiantes');
 
 const { validarCampos } = require('../middlewares/validar-campos');
@@ -38,6 +40,7 @@ router.post('/',[
     validarCampos, 
 ] 
 ,guardarEstudiante);
+
 router.put('/:id',[
     validarJWT,
     check('cedula','La cédula es requerida').not().isEmpty(),
@@ -55,6 +58,24 @@ router.put('/asignacion/:id',[
     validarCampos
 ] 
 ,asignacionEstudianteCurso);
+
+router.put('/imc/:id',[
+    validarJWT,
+    check('periodo','El periodo del registro es requerido').not().isEmpty(),
+    check('peso','El peso del estudiante es requerido').not().isEmpty(),
+    check('talla','La talla peso del estudiante es requerido').not().isEmpty(),
+    check('fecha_toma','La fecha de la toma es es requerida').not().isEmpty(),
+    validarCampos
+] 
+,registroEstudianteImc);
+
+router.put('/imc/actualizar/:id',[
+    validarJWT,
+    check('peso','El peso del estudiante es requerido').not().isEmpty(),
+    check('talla','La talla peso del estudiante es requerido').not().isEmpty(),
+    validarCampos
+] 
+,actualizarRegistroEstudianteImc);
 
 router.delete('/:id', [
     validarJWT,
